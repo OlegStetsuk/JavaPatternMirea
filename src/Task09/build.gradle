@@ -1,0 +1,48 @@
+package Task09
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    implementation "joda-time:joda-time:2.2"
+    testImplementation "junit:junit:4.12"
+}
+
+mainClassName = 'Main'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    archiveBaseName = 'task9'
+    manifest {
+        attributes(
+                "Main-Class": "Main",
+        )
+    }
+    println 'Jar was made'
+}
+
+task copyJar(type: Copy) {
+    dependsOn 'jar'
+    from file("$buildDir/libs/task9.jar")
+    into file("$rootDir/docker/")
+    println 'Jar was copied'
+}
+
+task buildImage(type: Exec) {
+    dependsOn 'copyJar'
+    commandLine 'docker', 'build', 'docker/', '-t', 'java'
+    println 'Image was built'
+}
+
+task dockerRun(type:Exec){
+    dependsOn 'buildImage'
+    commandLine 'docker','run','java'
+    println 'Run image'
+}
